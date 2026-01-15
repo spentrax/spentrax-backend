@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,           // ✅ ignore missing types in node_modules
+    "resolveJsonModule": true,      // ✅ allow importing JSON if needed
+    "moduleResolution": "node",     // ✅ properly resolves node modules
+    "noImplicitAny": false           // optional, prevents errors for untyped modules
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
