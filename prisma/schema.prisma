@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* =========================
+   USER
+========================= */
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+
+  projects  Project[]
+}
+
+/* =========================
+   PROJECT
+========================= */
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  userId      String
+  createdAt  DateTime      @default(now())
+
+  user        User          @relation(fields: [userId], references: [id])
+  apiKeys     ProjectApiKey[]
+  usageEvents UsageEvent[]
+  budgets     Budget[]
+
+  @@index([userId])
+}
+
+/* =========================
+   PROJECT API KEY
+========================= */
+model ProjectApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  projectId String
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  project   Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+
+/* =========================
+   USAGE EVENT
+========================= */
+model UsageEvent {
+  id           String   @id @default(uuid())
+  projectId    String
+  provider     String   // openai, gemini, anthropic
+  model        String   // gpt-4, gemini-pro, etc
+  inputTokens  Int
+  outputTokens Int
+  cost         Decimal  @db.Decimal(10, 4)
+  createdAt    DateTime @default(now())
+
+  project      Project  @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+/* =========================
+   BUDGET
+========================= */
+model Budget {
+  id          String   @id @default(uuid())
+  projectId   String
+  month       Int
+  year        Int
+  type        String   // "price" or "tokens"
+  limit       Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  project     Project  @relation(fields: [projectId], references: [id])
+  @@unique([projectId, month, year])
+}
+
