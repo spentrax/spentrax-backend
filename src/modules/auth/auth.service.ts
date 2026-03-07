@@ -1,31 +1,40 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { Injectable } from "@nestjs/common";
+import * as bcrypt from "bcrypt";
+import * as jwt from "jsonwebtoken";
+import { PrismaService } from "../../../prisma/prisma.service";
 
-import { prisma } from "../../config/db";
+@Injectable()
+export class AuthService {
+  constructor(private prisma: PrismaService) {}
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+  async signup(email: string, password: string) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-export const signup = async (email: string, password: string) => {
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) throw new Error("User already exists");
+    if (existingUser) throw new Error("User already exists");
 
-  const hashed = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
-    data: { email, password: hashed },
-  });
+    return this.prisma.user.create({
+      data: { email, password: hashed },
+    });
+  }
 
-  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
-  return { user, token };
-};
+  async login(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-export const login = async (email: string, password: string) => {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new Error("Invalid email or password");
+    if (!user) throw new Error("Invalid email or password");
 
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) throw new Error("Invalid email or password");
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new Error("Invalid email or password");
 
-  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
-  return { user, token };
-};
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
+      expiresIn: "7d",
+    });
+
+    return { user, token };
+  }
+}

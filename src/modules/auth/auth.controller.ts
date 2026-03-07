@@ -1,23 +1,18 @@
-import * as AuthService from "./auth.service";
+import { Body, Controller, Post } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { SignupDto, LoginDto } from "./dto/auth.dto";
 
-export const signup = async ({
-  body: { email, password },
-}: any) => {
-  const result = await AuthService.signup(email, password);
+@Controller("auth")
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
-  return {
-    statusCode: 201,
-    data: result,
-  };
-};
+  @Post("signup")
+  signup(@Body() body: SignupDto) {
+    return this.authService.signup(body.email, body.password);
+  }
 
-export const login = async ({
-  body: { email, password },
-}: any) => {
-  const result = await AuthService.login(email, password);
-
-  return {
-    statusCode: 200,
-    data: result,
-  };
-};
+  @Post("login")
+  login(@Body() body: LoginDto) {
+    return this.authService.login(body.email, body.password);
+  }
+}
