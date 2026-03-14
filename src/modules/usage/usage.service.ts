@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { BudgetType } from '@prisma/client'
+import { TrackUsageDto } from './dto/track-usage.dto'
 
 import { PrismaService } from '../../prisma/prisma.service'
 
@@ -7,8 +8,9 @@ import { PrismaService } from '../../prisma/prisma.service'
 export class UsageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async trackUsage(dto: any) {
-    const { apiKey, provider, model, inputTokens, outputTokens } = dto
+  async trackUsage(dto: TrackUsageDto, apiKey: string) {
+    console.log('dto', dto, 'apiKey', apiKey)
+    const { events } = dto
 
     // 1️⃣ validate api key
     const apiKeyRecord = await this.prisma.projectApiKey.findUnique({
@@ -21,35 +23,41 @@ export class UsageService {
 
     const projectId = apiKeyRecord.projectId
 
-    // 2️⃣ calculate tokens
-    const totalTokens = inputTokens + outputTokens
+    // 2️⃣ prepare usage rows
+    const usageData = events.map((event: any) => {
+      const totalTokens = event.inputTokens + event.outputTokens
 
-    // 3️⃣ calculate cost
-    const cost = this.calculateCost(provider, model, totalTokens)
+      const cost = this.calculateCost(event.provider, event.model, totalTokens)
 
-    // 4️⃣ store usage event
-    const usage = await this.prisma.usageEvent.create({
-      data: {
+      return {
         projectId,
-        provider,
-        model,
-        inputTokens,
-        outputTokens,
+        provider: event.provider,
+        model: event.model,
+        inputTokens: event.inputTokens,
+        outputTokens: event.outputTokens,
         cost,
-      },
+      }
     })
 
-    // 5️⃣ check budget
+    // 3️⃣ store batch usage
+    await this.prisma.usageEvent.createMany({
+      data: usageData,
+    })
+
+    // 4️⃣ check budget
     await this.checkBudget(projectId)
 
-    return usage
+    return { success: true }
   }
 
   calculateCost(provider: string, model: string, tokens: number) {
-    const pricing = {
+    const pricing: any = {
       openai: {
         'gpt-4': 0.03,
         'gpt-3.5': 0.002,
+      },
+      anthropic: {
+        'claude-3': 0.015,
       },
     }
 
@@ -82,10 +90,9 @@ export class UsageService {
           _sum: { cost: true },
         })
 
-        if (
-          usage._sum.cost &&
-          Number(usage._sum.cost) >= Number(budget.limit)
-        ) {
+        const totalCost = usage._sum.cost || 0
+
+        if (Number(totalCost) >= Number(budget.limit)) {
           this.sendNotification(projectId, 'Cost limit reached')
         }
       }
