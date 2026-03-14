@@ -2,33 +2,33 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-} from '@nestjs/common';
+} from '@nestjs/common'
 
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateBudgetDto } from './dto/budget.dto';
+import { PrismaService } from '../../prisma/prisma.service'
+import { CreateBudgetDto } from './dto/budget.dto'
 
 @Injectable()
 export class BudgetService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createTarget(userId: string, dto: CreateBudgetDto) {
-    const { projectId, type, limit } = dto;
+    const { projectId, type, limit } = dto
 
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
-    });
+    })
 
     if (!project) {
-      throw new BadRequestException('Project not found');
+      throw new BadRequestException('Project not found')
     }
 
     if (project.userId !== userId) {
-      throw new BadRequestException('Unauthorized project');
+      throw new BadRequestException('Unauthorized project')
     }
 
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
+    const now = new Date()
+    const month = now.getMonth() + 1
+    const year = now.getFullYear()
 
     const existing = await this.prisma.budget.findFirst({
       where: {
@@ -37,12 +37,10 @@ export class BudgetService {
         year,
         type,
       },
-    });
+    })
 
     if (existing) {
-      throw new BadRequestException(
-        'Target already exists for this month',
-      );
+      throw new BadRequestException('Target already exists for this month')
     }
 
     return this.prisma.budget.create({
@@ -53,7 +51,7 @@ export class BudgetService {
         month,
         year,
       },
-    });
+    })
   }
 
   // GET ALL TARGETS
@@ -67,7 +65,7 @@ export class BudgetService {
       include: {
         project: true,
       },
-    });
+    })
   }
 
   // GET ONE TARGET
@@ -79,13 +77,13 @@ export class BudgetService {
           userId,
         },
       },
-    });
+    })
 
     if (!target) {
-      throw new NotFoundException('Target not found');
+      throw new NotFoundException('Target not found')
     }
 
-    return target;
+    return target
   }
 
   // UPDATE TARGET
@@ -97,16 +95,16 @@ export class BudgetService {
           userId,
         },
       },
-    });
+    })
 
     if (!target) {
-      throw new NotFoundException('Target not found');
+      throw new NotFoundException('Target not found')
     }
 
     return this.prisma.budget.update({
       where: { id },
       data: { limit },
-    });
+    })
   }
 
   // DELETE TARGET
@@ -118,14 +116,14 @@ export class BudgetService {
           userId,
         },
       },
-    });
+    })
 
     if (!target) {
-      throw new NotFoundException('Target not found');
+      throw new NotFoundException('Target not found')
     }
 
     return this.prisma.budget.delete({
       where: { id },
-    });
+    })
   }
 }

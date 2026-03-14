@@ -3,68 +3,70 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-} from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { Request } from "express";
+} from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Request } from 'express'
 
 const apiKeyRoutes = [
-  { route: "/api/v1/auth/login", method: "POST" },
-  { route: "/api/v1/auth/signup", method: "POST" },
-];
+  { route: '/api/v1/auth/login', method: 'POST' },
+  { route: '/api/v1/auth/signup', method: 'POST' },
+]
 
-const publicRoutes = [{ route: "/health", method: "GET" }];
+const publicRoutes = [{ route: '/health', method: 'GET' }]
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<Request>()
 
-    const path = request.route?.path || request.url;
-    const method = request.method;
+    const path = request.route?.path || request.url
+    const method = request.method
 
     const isPublicRoute = publicRoutes.some(
       (r) => path === r.route && method === r.method,
-    );
+    )
 
     if (isPublicRoute) {
-      return true;
+      return true
     }
 
     const isApiKeyRoute = apiKeyRoutes.some(
       (r) => path === r.route && method === r.method,
-    );
+    )
 
     if (isApiKeyRoute) {
-      const apiKey = request.headers["x-api-key"] || request.headers["api_key"];
+      const apiKey = request.headers['x-api-key'] || request.headers['api_key']
 
       if (!apiKey || apiKey !== process.env.API_KEY) {
-        throw new UnauthorizedException("Invalid API key");
+        throw new UnauthorizedException('Invalid API key')
       }
 
-      return true;
+      return true
     }
 
     // 🔐 JWT verification
-    const authHeader = request.headers.authorization;
+    const authHeader = request.headers.authorization
 
     if (!authHeader) {
-      throw new UnauthorizedException("Unauthorized");
+      throw new UnauthorizedException('Unauthorized')
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(' ')[1]
 
     try {
       const decoded = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
-      });
+      })
 
-      (request as any).user = decoded;
+      ;(request as any).user = decoded
 
-      return true;
+      return true
     } catch (err) {
-      throw new UnauthorizedException( err instanceof Error ? err.message : "INVALID_OR_EXPIRED_TOKEN");
+      throw new UnauthorizedException(
+        err instanceof Error ? err.message : 'INVALID_OR_EXPIRED_TOKEN',
+      )
     }
   }
 }

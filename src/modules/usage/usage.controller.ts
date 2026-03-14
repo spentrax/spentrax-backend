@@ -1,6 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common'
 
-import { UsageService } from './usage.service';
+import { UsageService } from './usage.service'
 
 @Controller('usage')
 export class UsageController {
@@ -8,6 +8,6 @@ export class UsageController {
 
   @Post()
   trackUsage(@Body() body: any) {
-    return this.usageService.trackUsage(body);
+    return this.usageService.trackUsage(body)
   }
 }

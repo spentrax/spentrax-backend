@@ -1,8 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Module } from '@nestjs/common'
 
-import { ProjectsController } from "./project.controller";
-import { ProjectsService } from "./projects.service";
-import { PrismaModule } from "../../prisma/prisma.module";
+import { ProjectsController } from './project.controller'
+import { ProjectsService } from './projects.service'
+import { PrismaModule } from '../../prisma/prisma.module'
 
 @Module({
   imports: [PrismaModule],

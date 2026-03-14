@@ -45,6 +45,7 @@
     "@typescript-eslint/parser": "^8.53.0",
     "eslint": "^9.39.4",
     "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.8.1",
     "prisma": "^6.19.2",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.57.0"
