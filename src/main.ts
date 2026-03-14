@@ -1,6 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { PORT } from "./common/config";
+import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,10 +8,14 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix("api/v1");
 
-  await app.listen(PORT);
+  const configService = app.get(ConfigService);
 
-  console.log(`🚀 Spentrax backend running on http://localhost:${PORT}`);
-  console.log(`❤️ Health check: http://localhost:${PORT}/api/v1/health`);
+  const port = configService.get<number>("port");
+
+  await app.listen(port);
+
+  console.log(`🚀 Spentrax backend running on http://localhost:${port}`);
+  console.log(`❤️ Health check: http://localhost:${port}/api/v1/health`);
 }
 
 bootstrap();
