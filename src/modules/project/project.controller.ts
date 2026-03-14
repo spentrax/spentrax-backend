@@ -6,39 +6,38 @@ import {
   Delete,
   Body,
   Param,
-} from '@nestjs/common'
+} from '@nestjs/common';
 
-import { ProjectsService } from './projects.service'
-import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto'
+import { ProjectsService } from './projects.service';
+import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
+import { CurrentUserId } from '../../common/utils/common.util';
 
 @Controller('project')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  create(@Body() dto: CreateProjectDto) {
-    const userId = '7e43ae41-5583-44f3-8d63-562501c0cd30'
-    return this.projectsService.create(userId, dto.name)
+  create(@CurrentUserId() userId: string, @Body() dto: CreateProjectDto) {
+    return this.projectsService.create(userId, dto.name);
   }
 
   @Get()
-  findAll() {
-    const userId = '7e43ae41-5583-44f3-8d63-562501c0cd30'
-    return this.projectsService.findAll(userId)
+  findAll(@CurrentUserId() userId: string) {
+    return this.projectsService.findAll(userId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.projectsService.findOne(id)
+    return this.projectsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
-    return this.projectsService.update(id, dto.name)
+    return this.projectsService.update(id, dto.name);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.projectsService.remove(id)
+    return this.projectsService.remove(id);
   }
 }

@@ -3,11 +3,11 @@ import { BudgetType } from '@prisma/client'
 
 export class CreateBudgetDto {
   @IsString()
-  projectId: string
+  projectId!: string
 
   @IsEnum(BudgetType)
-  type: BudgetType
+  type!: BudgetType
 
   @IsNumber()
-  limit: number
+  limit!: number
 }

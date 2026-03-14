@@ -3,23 +3,21 @@ import { Type } from 'class-transformer'
 
 export class TrackEventDto {
   @IsString()
-  provider: string
+  provider!: string
 
   @IsString()
-  model: string
+  model!: string
 
   @IsNumber()
-  inputTokens: number
+  inputTokens!: number
 
   @IsNumber()
-  outputTokens: number
+  outputTokens!: number
 }
 
 export class TrackUsageDto {
- 
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TrackEventDto)
-  events: TrackEventDto[]
+  events!: TrackEventDto[]
 }

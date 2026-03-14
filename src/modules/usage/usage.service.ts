@@ -9,7 +9,6 @@ export class UsageService {
   constructor(private readonly prisma: PrismaService) {}
 
   async trackUsage(dto: TrackUsageDto, apiKey: string) {
-    console.log('dto', dto, 'apiKey', apiKey)
     const { events } = dto
 
     // 1️⃣ validate api key

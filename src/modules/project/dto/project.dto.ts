@@ -2,10 +2,10 @@ import { IsString } from 'class-validator'
 
 export class CreateProjectDto {
   @IsString()
-  name: string
+  name!: string
 }
 
 export class UpdateProjectDto {
   @IsString()
-  name: string
+  name!: string
 }

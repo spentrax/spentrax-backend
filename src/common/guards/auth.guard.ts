@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 
@@ -12,56 +13,54 @@ const apiKeyRoutes = [
   { route: '/api/v1/auth/signup', method: 'POST' },
 ]
 
-const publicRoutes = [{ route: '/health', method: 'GET' }]
+const publicRoutes = [
+  { route: '/api/v1/health', method: 'GET' },
+  { route: '/api/v1/usage/batch', method: 'POST' },
+
+]
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>()
-
-    const path = request.route?.path || request.url
+    const path = request.url.split('?')[0] // remove query params
     const method = request.method
 
-    const isPublicRoute = publicRoutes.some(
-      (r) => path === r.route && method === r.method,
-    )
-
-    if (isPublicRoute) {
+    console.log('path', path)
+    console.log('method', method)
+    // Public route
+    if (publicRoutes.some(r => r.route === path && r.method === method)) {
       return true
     }
 
-    const isApiKeyRoute = apiKeyRoutes.some(
-      (r) => path === r.route && method === r.method,
-    )
-
-    if (isApiKeyRoute) {
+    // API key route
+    const apiKeyRoute = apiKeyRoutes.find(r => r.route === path && r.method === method)
+    if (apiKeyRoute) {
       const apiKey = request.headers['x-api-key'] || request.headers['api_key']
-
-      if (!apiKey || apiKey !== process.env.API_KEY) {
+      if (!apiKey || apiKey !== this.configService.get<string>('apiKey')) {
         throw new UnauthorizedException('Invalid API key')
       }
-
       return true
     }
 
-    // 🔐 JWT verification
+    // JWT verification
     const authHeader = request.headers.authorization
-
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Unauthorized')
     }
 
     const token = authHeader.split(' ')[1]
-
     try {
-      const decoded = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
+      const decoded = await this.jwtService.verifyAsync<any>(token, {
+        secret: this.configService.get<string>('jwtAccessSecret'),
       })
-
       ;(request as any).user = decoded
-
+      ;(request as any).userId = decoded.userId
       return true
     } catch (err) {
       throw new UnauthorizedException(
