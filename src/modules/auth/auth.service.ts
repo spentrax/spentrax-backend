@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import { PrismaService } from "../../prisma/prisma.service";
 import { BadRequestException } from "@nestjs/common";
+
+import { PrismaService } from "../../prisma/prisma.service";
 import { hashPassword, verifyPassword } from "../../common/utils/generate.util";
 
 @Injectable()

@@ -1,4 +1,5 @@
 import { randomBytes } from "crypto";
+
 import * as bcrypt from "bcrypt";
 
 export function generateApiKey(): string {
