@@ -31,8 +31,6 @@ export class AuthGuard implements CanActivate {
     const path = request.url.split('?')[0] // remove query params
     const method = request.method
 
-    console.log('path', path)
-    console.log('method', method)
     // Public route
     if (publicRoutes.some(r => r.route === path && r.method === method)) {
       return true
