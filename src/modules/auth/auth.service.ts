@@ -12,7 +12,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async signup(email: string, password: string) {
+  async signup(email: string, password: string, name: string) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     })
@@ -22,7 +22,7 @@ export class AuthService {
     const hashed = await hashPassword(password)
 
     await this.prisma.user.create({
-      data: { email, password: hashed },
+      data: { email, password: hashed, name },
     })
 
     return { success: true }

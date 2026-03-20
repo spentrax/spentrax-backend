@@ -5,7 +5,7 @@ export default function configuration() {
     jwtAccessDuration: process.env.JWT_ACCESS_DURATION,
     jwtRefreshDuration: process.env.JWT_REFRESH_DURATION,
     apiKey: process.env.API_KEY,
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 5000,
     databaseUrl: process.env.DATABASE_URL,
   }
 }

@@ -10,7 +10,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
 
   const configService = app.get(ConfigService)
-  const port = configService.get<number>('port') || 3000
+  const port = configService.get<number>('port') || 5000
 
   await app.listen(port)
   console.log(`Spentrax backend running on http://localhost:${port}`)
