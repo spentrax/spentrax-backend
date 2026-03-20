@@ -1,6 +1,7 @@
 import * as jwt from 'jsonwebtoken'
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Prisma } from '@prisma/client'
 
 import { PrismaService } from '../../prisma/prisma.service'
 import { hashPassword, verifyPassword } from '../../common/utils/generate.util'
@@ -22,7 +23,11 @@ export class AuthService {
     const hashed = await hashPassword(password)
 
     await this.prisma.user.create({
-      data: { email, password: hashed, name },
+      data: {
+        email,
+        password: hashed,
+        name,
+      } as Prisma.UserCreateInput,
     })
 
     return { success: true }
