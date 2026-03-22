@@ -11,6 +11,7 @@ import { ProjectModule } from './modules/project/project.module'
 import { BudgetModule } from './modules/budget/budget.module'
 import { UsageModule } from './modules/usage/usage.module'
 import { AuthGuard } from './common/guards/auth.guard'
+import { UserModule } from './modules/user/user.module'
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AuthGuard } from './common/guards/auth.guard'
     ProjectModule,
     BudgetModule,
     UsageModule,
+    UserModule,
   ],
   providers: [
     {
